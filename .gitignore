@@ -1,0 +1,5 @@
+analyzer.egg-info/
+swapown_venv/
+.DS_Store
+outputs/
+.vscode/
