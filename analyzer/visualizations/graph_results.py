@@ -74,15 +74,15 @@ dt = 1 / SAMP_RATE
 # plt.savefig(f"{OUT_DIR}/saw_transform.png")
 
 # Decompose noise
-# x_p_noise = np.linspace(1, 4, 4)
-# trans = decomposer.decomp_param(waveforms.noise, xlist, x_p_noise, num_samp, dt)
+x_p_noise = np.linspace(100, 1000, 4)
+trans = decomposer.decomp_param(waveforms.noise, xlist, x_p_noise, num_samp, dt)
 
 # Decompose parameterized square
 # x_p_pulsqr = np.linspace(0, 1, 20)
 # trans = decomposer.decomp_param(waveforms.pul_sqr, xlist, x_p_pulsqr, num_samp, dt)
 
-x_p_sawtri = np.linspace(0, 1, 30)
-trans = decomposer.decomp_param(waveforms.saw_tri, xlist, x_p_sawtri, num_samp, dt)
+# x_p_sawtri = np.linspace(0, 1, 30)
+# trans = decomposer.decomp_param(waveforms.saw_tri, xlist, x_p_sawtri, num_samp, dt)
 # trans = decomposer.decomp_param(waveforms.test_sine, xlist, x_p_sawtri, num_samp, dt)
 # saw_tri_land = generate_landscape(waveforms.test_sine, xlist, x_p_sawtri)
 

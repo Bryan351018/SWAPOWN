@@ -82,7 +82,7 @@ def noise(x, gen_freq=None):
     gen_freq: the generation frequency (overrides analyzer.freq)
     '''
     # Get generation period (use gen_freq if available, else freq)
-    period = 1 / (gen_freq if gen_freq is not None else freq)
+    period = 1 / (gen_freq[0] if gen_freq is not None else freq)
 
     # Create random number generator
     rng = default_rng()
@@ -92,7 +92,7 @@ def noise(x, gen_freq=None):
     if type(period) == "float":
         rand_amt = int(np.amax(x) // period)
     else:
-        rand_amt = (np.amax(x) // period).astype(int).reshape(-1)
+        rand_amt = np.maximum(np.amax(x) // period, 1).astype(int)
 
 
 
@@ -100,16 +100,17 @@ def noise(x, gen_freq=None):
     rand = rng.uniform(-amp, amp, np.sum(rand_amt))
 
     # Index array start bounds
-    index_starts = np.add.accumulate(rand_amt)
+    index_starts = np.add.accumulate(rand_amt.flat)
     index_starts = np.insert(index_starts, 0, 0)
     index_starts = np.delete(index_starts, -1)
+
 
     # # Get repeats per full generation period
     # rep = np.maximum(period // (x[1] - x[0]), 1).astype("int64").reshape(-1)
 
     # Make index arrays
-    indexarr = np.linspace(index_starts, index_starts + rand_amt - 1, x.size)
-    indexarr = np.transpose(indexarr)
+    indexarr = np.linspace(index_starts, index_starts + rand_amt.flat - 1, x.shape[0])
+    # indexarr = np.transpose(indexarr)
     indexarr = np.floor(indexarr)
 
     # Make filled random number arrays
