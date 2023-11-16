@@ -2,7 +2,7 @@
 Test waveforms that will go through fourier analysis later
 '''
 
-from numpy import sin, pi, repeat, amax, append
+import numpy as np
 from numpy.random import default_rng
 from scipy.signal import square, sawtooth
 
@@ -18,11 +18,11 @@ amp: float
 
 def sin_osc(x):
     '''Sine oscillator'''
-    return amp * sin(2 * pi * freq * x)
+    return amp * np.sin(2 * np.pi * freq * x)
 
 def tri_osc(x):
     '''Triangle oscillator'''
-    return amp * sawtooth(2 * pi * freq * x, 0.5)
+    return amp * sawtooth(2 * np.pi * freq * x, 0.5)
 
 """
 Square wave older implementation
@@ -53,37 +53,143 @@ def squ_osc(x: float) -> float:
 """
 def rect_osc(x, duty: float = 0.5):
     '''Rectangular oscillator with mutable duty'''
-    return amp * square(2 * pi * freq * x, duty)
+    return amp * square(2 * np.pi * freq * x, duty)
 
 def saw_osc(x):
     '''Sawtooth oscillator'''
-    return amp * sawtooth(2 * pi * freq * x)
+    return amp * sawtooth(2 * np.pi * freq * x)
 
 
 
 # 2. Parameterized oscillators
+def pul_sqr(x, p):
+    '''Rectangular oscillator with duty parameterized from 0 to 1'''
+    return rect_osc(x, p)
 
+def tri_sqr(x, p):
+    pass
 
-# 3. White noise
-def noise(x):
-    '''White noise generator'''
-    # Get generation period
-    period = 1 / freq
+def saw_tri(x, p):
+    '''Saw-to-triangle oscillator with morph parameterized from 0 to 1'''
+    return amp * sawtooth(2 * np.pi * freq * x, p / 2)
+
+# 3. White noise (old implementation)
+def noise(x, gen_freq=None):
+    '''
+    White noise generator
+
+    OPTIONAL ARGUMENT:
+    gen_freq: the generation frequency (overrides analyzer.freq)
+    '''
+    # Get generation period (use gen_freq if available, else freq)
+    period = 1 / (gen_freq if gen_freq is not None else freq)
 
     # Create random number generator
     rng = default_rng()
 
-    # Get random numbers
-    rand = (rng.random(int(amax(x) // period)) - 0.5) / 0.5 * amp
-
-    # Half-baked result
-    res = repeat(rand, max(period // (x[1] - x[0]), 1))[:x.size]
-
-    # Append missing elements
-    if res.size:
-        res = append(res, repeat(res[-1], x.size - res.size))
-    # If there's no elements at all, add an element
+    # Amount of random numbers to get
+    rand_amt = None
+    if type(period) == "float":
+        rand_amt = int(np.amax(x) // period)
     else:
-        res = (rng.random(1) - 0.5) / 0.5 * amp
+        rand_amt = (np.amax(x) // period).astype(int).reshape(-1)
+
+
+
+    # Get all random numbers
+    rand = rng.uniform(-amp, amp, np.sum(rand_amt))
+
+    # Index array start bounds
+    index_starts = np.add.accumulate(rand_amt)
+    index_starts = np.insert(index_starts, 0, 0)
+    index_starts = np.delete(index_starts, -1)
+
+    # # Get repeats per full generation period
+    # rep = np.maximum(period // (x[1] - x[0]), 1).astype("int64").reshape(-1)
+
+    # Make index arrays
+    indexarr = np.linspace(index_starts, index_starts + rand_amt - 1, x.size)
+    indexarr = np.transpose(indexarr)
+    indexarr = np.floor(indexarr)
+
+    # Make filled random number arrays
+    filled_arr = rand[indexarr.astype("int64")]
+
+    return filled_arr
+
+    # # Stretch some random samples evenly to 
+    # def stretch(rands, source):
+    #     pass
+
+    # # Array of repeat times
+
+    # a. 
     
-    return res
+
+    # # b. Get number of remainder repeats
+    # rep_rem_p = (x.size % rep).reshape(-1)
+
+    # # c. Get number of full repeat periods
+    # rep_full_p = rand_amt - np.sign(rep_rem_p)
+
+    # # c. Interleave
+    # def interleave(a, b, loc):
+    #     c = np.insert(a, loc, b)
+    #     return c
+
+    # rep_list = interleave(np.repeat(rep, rep_full_p), rep_rem_p, np.add.accumulate(rep_full_p))
+
+    # # d. Repeat
+    # res = np.repeat(rand, rep_list).reshape(x.size, -1)
+
+    # # # Half-baked result
+    # # res = np.repeat(rand.flat, rep.flat)[:x.size]
+
+    # # # Append missing elements
+    # # if res.size:
+    # #     res = np.append(res, np.repeat(res[-1], x.size - res.size))
+    # # # If there's no elements at all, add an element
+    # # else:
+    # #     res = (rng.random(1) - 0.5) / 0.5 * amp
+    
+    # return res
+
+# def noise(x, gen_freq=None):
+#     '''
+#     White noise generator
+
+#     OPTIONAL ARGUMENT:
+#     gen_freq: the generation frequency (overrides analyzer.freq)
+#     '''
+
+#     # Get active frequency variable
+#     f = gen_freq if gen_freq is not None else freq
+
+#     # Get generation period (use gen_freq if available, else freq)
+#     period = 1 / f
+
+#     # Construct pandas timedelta object
+#     pd_delta = pd.Timedelta(period, "sec")
+
+#     # Create random number generator
+#     rng = default_rng()
+
+#     # Amount of random numbers to get
+#     rand_amt = None
+#     if type(period) == "float":
+#         rand_amt = int(np.amax(x) // period)
+#     else:
+#         rand_amt = (np.amax(x) // period).astype(int).reshape(-1)
+
+#     # Get all random numbers
+#     rand = rng.uniform(-amp, amp, np.sum(rand_amt))
+
+#     # Construct pandas series object
+#     pd_series = pd.Series(rand, pd.interval_range(start=x[0], end=x[-1], freq=f))
+
+#     pd_series = pd_series.resample(pd_delta)
+
+
+# Test
+def test_sine(x, p):
+    return np.sin(2 * np.pi * (p * 2000 + 2000) * x)
