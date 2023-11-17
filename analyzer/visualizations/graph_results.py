@@ -74,17 +74,17 @@ dt = 1 / SAMP_RATE
 # plt.savefig(f"{OUT_DIR}/saw_transform.png")
 
 # Decompose noise
-x_p_noise = np.linspace(100, 1000, 4)
-trans = decomposer.decomp_param(waveforms.noise, xlist, x_p_noise, num_samp, dt)
+# x_p_noise = np.linspace(100, 1000, 4)
+# trans = decomposer.decomp_param(waveforms.noise, xlist, x_p_noise, num_samp, dt)
 
 # Decompose parameterized square
 # x_p_pulsqr = np.linspace(0, 1, 20)
 # trans = decomposer.decomp_param(waveforms.pul_sqr, xlist, x_p_pulsqr, num_samp, dt)
 
-# x_p_sawtri = np.linspace(0, 1, 30)
+x_p_sawtri = np.linspace(0, 1, 30)
 # trans = decomposer.decomp_param(waveforms.saw_tri, xlist, x_p_sawtri, num_samp, dt)
 # trans = decomposer.decomp_param(waveforms.test_sine, xlist, x_p_sawtri, num_samp, dt)
-# saw_tri_land = generate_landscape(waveforms.test_sine, xlist, x_p_sawtri)
+saw_tri_land = generate_landscape(waveforms.tri_sqr, xlist, x_p_sawtri)
 
 fig = plt.figure()
 ax = fig.add_subplot(projection='3d')
@@ -95,8 +95,8 @@ ax = fig.add_subplot(projection='3d')
 # ax.plot_surface(p_mesh, x_mesh, np.zeros_like(p_mesh))
 
 # Plot the main graph
-ax.plot_surface(trans[0], trans[1], trans[2], cmap="binary")
-# ax.plot_surface(saw_tri_land[0], saw_tri_land[1], saw_tri_land[2], cmap="binary")
+# ax.plot_surface(trans[0], trans[1], trans[2], cmap="binary")
+ax.plot_surface(saw_tri_land[0], saw_tri_land[1], saw_tri_land[2], cmap="binary")
 
 # fig.colorbar(surf, shrink=0.5, aspect=5)
 

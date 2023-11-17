@@ -13,6 +13,17 @@ freq: float
 amp: float
 '''The amplitude'''
 
+# Shift by a quarter period
+def shift_QP(x, freq):
+    return (x + 1 / (4 * freq))
+
+# Shift by a half period
+def shift_HP(x, freq):
+    return (x + 1 / (2 * freq))
+
+# Shift dynamically (for a sawtooth-triangle oscillator)
+def shift_dynam(x, freq, p):
+    return (x + (2 - p) / (4 * freq))
 
 # 1. Basic waveforms
 
@@ -22,7 +33,7 @@ def sin_osc(x):
 
 def tri_osc(x):
     '''Triangle oscillator'''
-    return amp * sawtooth(2 * np.pi * freq * x, 0.5)
+    return amp * sawtooth(2 * np.pi * freq * shift_QP(x, freq), 0.5)
 
 """
 Square wave older implementation
@@ -57,7 +68,7 @@ def rect_osc(x, duty: float = 0.5):
 
 def saw_osc(x):
     '''Sawtooth oscillator'''
-    return amp * sawtooth(2 * np.pi * freq * x)
+    return amp * sawtooth(2 * np.pi * freq * shift_HP(x, freq))
 
 
 
@@ -67,11 +78,61 @@ def pul_sqr(x, p):
     return rect_osc(x, p)
 
 def tri_sqr(x, p):
-    pass
+    '''Triangle-to-square oscillator with morph parameterized from 0 to 1'''
+    # Quarter-period
+    QP = 1 / (4 * freq)
+
+    # Half-flat-edge (half of the peak or trough duration)
+    half_flat = QP * p
+
+    # X Modulo period (i.e. stage of a period)
+    x_mod_t = np.mod(x, 1 / freq)
+
+    # Rising line slope
+    rise = amp / (1 / ((4 * freq) - p / 2))
+
+    # return np.piecewise(x_mod_t, 
+    # [
+    #     np.logical_and(x_mod_t >= 0, x_mod_t < QP - p / 2), # First rise
+    #     np.logical_and(x_mod_t >= QP - p / 2, x_mod_t < QP + p / 2), # Steady peak
+    #     np.logical_and(x_mod_t >= QP + p / 2, x_mod_t < 3 * QP - p / 2), # Fall
+    #     np.logical_and(x_mod_t >= 3 * QP - p / 2, x_mod_t < 3 * QP + p / 2), # Steady trough
+    #     np.logical_and(x_mod_t >= 3 * QP + p / 2, x_mod_t < 4 * QP) # Second rise
+    # ],
+    # [
+    #     lambda x_mod_t: x_mod_t * rise, # First rise
+    #     amp, # Steady peak
+    #     lambda x_mod_t: (x_mod_t - (QP + p / 2)) * -rise, # Fall
+    #     -amp, # Steady trough
+    #     lambda x_mod_t: (x_mod_t - (3 * QP + p / 2)) * rise # Second rise
+    # ])
+
+    # Alternative implementation with select
+
+    # Condition lists
+    conds = [
+        np.logical_and(x_mod_t >= 0, x_mod_t < QP - half_flat), # First rise
+        np.logical_and(x_mod_t >= QP - half_flat, x_mod_t < QP + half_flat), # Steady peak
+        np.logical_and(x_mod_t >= QP + half_flat, x_mod_t < 3 * QP - half_flat), # Fall
+        np.logical_and(x_mod_t >= 3 * QP - half_flat, x_mod_t < 3 * QP + half_flat), # Steady trough
+        np.logical_and(x_mod_t >= 3 * QP + half_flat, x_mod_t < 4 * QP) # Second rise
+    ]
+
+    # Function lists
+    funcs = [
+        x_mod_t * rise, # First rise
+        amp, # Steady peak
+        amp - (x_mod_t - (QP + half_flat)) * rise, # Fall
+        -amp, # Steady trough
+        -amp + (x_mod_t - (3 * QP + half_flat)) * rise # Second rise
+    ]
+
+    return np.select(conds, funcs)
+
 
 def saw_tri(x, p):
     '''Saw-to-triangle oscillator with morph parameterized from 0 to 1'''
-    return amp * sawtooth(2 * np.pi * freq * x, p / 2)
+    return amp * sawtooth(2 * np.pi * freq * shift_dynam(x, freq, p), 1 - p / 2)
 
 # 3. White noise (old implementation)
 def noise(x, gen_freq=None):
