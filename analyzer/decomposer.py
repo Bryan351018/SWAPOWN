@@ -115,7 +115,7 @@ def decomp(y, n, dt):
 
 #     return (pretty_p, trans_x, trans_y)
 
-def decomp_param(func, x, p, n, dt):
+def decomp_param(func, x, p, n, dt, normalized=True):
     '''
     Get the fourier transform results for a parameterized wave.
 
@@ -125,6 +125,7 @@ def decomp_param(func, x, p, n, dt):
     p: the list of parameters (in a single unnested ndarray)
     n: number of samples
     dt: time step between the samples
+    normalized: whether to output [1,2,...] instead of frequency values in frequency output
 
     RETURN VALUE
     A tuple (p, tx, ty), 
@@ -155,5 +156,9 @@ def decomp_param(func, x, p, n, dt):
     # Transpose it
     pretty_p = np.transpose(pretty_p)    
     # trans_y = np.transpose(trans_y)
+
+    # Normalization
+    if normalized:
+        trans_x /= trans_x[1][0]
 
     return (pretty_p, trans_x, trans_y)

@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib import cm
 from os.path import dirname
 from analyzer.waveform_landscapes import generate_landscape
-from math import ceil
+from math import ceil, pi
 
 # Output directory
 OUT_DIR = dirname(__file__) + "/../outputs"
@@ -15,10 +15,10 @@ OUT_DIR = dirname(__file__) + "/../outputs"
 # Set graph theme
 plt.style.use('dark_background')
 # Set graph axis labels
-# plt.xlabel("Frequency")
-# plt.ylabel("Amplitude")
+# plt.xlabel("n")
+# plt.ylabel("b_n")
 # Set graph title
-# plt.title("Fourier Transform of a Square Wave")
+# plt.title("Fourier Series of a Sine Wave")
 
 
 
@@ -26,10 +26,10 @@ plt.style.use('dark_background')
 waveforms.amp = 1.0
 
 # Frequency
-waveforms.freq = 200
+waveforms.freq = 1 / (2 * pi)
 
 # Sample rate
-SAMP_RATE = 9000
+SAMP_RATE = 10
 
 # Periods of wave to analyze
 SAMP_PERIODS = 1
@@ -71,7 +71,7 @@ dt = 1 / SAMP_RATE
 # plt.plot(noise_trans[0], noise_trans[1])
 
 # plt.show()
-# plt.savefig(f"{OUT_DIR}/saw_transform.png")
+# plt.savefig(f"{OUT_DIR}/sin_transform.png")
 
 # Decompose noise
 # x_p_noise = np.linspace(100, 1000, 4)
@@ -82,9 +82,9 @@ dt = 1 / SAMP_RATE
 # trans = decomposer.decomp_param(waveforms.pul_sqr, xlist, x_p_pulsqr, num_samp, dt)
 
 x_p_sawtri = np.linspace(0, 1, 30)
-# trans = decomposer.decomp_param(waveforms.saw_tri, xlist, x_p_sawtri, num_samp, dt)
+trans = decomposer.decomp_param(waveforms.saw_tri, xlist, x_p_sawtri, num_samp, dt)
 # trans = decomposer.decomp_param(waveforms.test_sine, xlist, x_p_sawtri, num_samp, dt)
-saw_tri_land = generate_landscape(waveforms.tri_sqr, xlist, x_p_sawtri)
+# saw_tri_land = generate_landscape(waveforms.tri_sqr, xlist, x_p_sawtri)
 
 fig = plt.figure()
 ax = fig.add_subplot(projection='3d')
@@ -95,9 +95,14 @@ ax = fig.add_subplot(projection='3d')
 # ax.plot_surface(p_mesh, x_mesh, np.zeros_like(p_mesh))
 
 # Plot the main graph
-# ax.plot_surface(trans[0], trans[1], trans[2], cmap="binary")
-ax.plot_surface(saw_tri_land[0], saw_tri_land[1], saw_tri_land[2], cmap="binary")
+surf = ax.plot_surface(trans[0], trans[1], trans[2], cmap="binary")
+# ax.plot_surface(saw_tri_land[0], saw_tri_land[1], saw_tri_land[2], cmap="binary")
 
 # fig.colorbar(surf, shrink=0.5, aspect=5)
+
+
+ax.set_xlabel("p")
+ax.set_ylabel("n")
+ax.set_zlabel("|A|")
 
 plt.show()

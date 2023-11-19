@@ -91,22 +91,6 @@ def tri_sqr(x, p):
     # Rising line slope
     rise = amp / (1 / ((4 * freq) - p / 2))
 
-    # return np.piecewise(x_mod_t, 
-    # [
-    #     np.logical_and(x_mod_t >= 0, x_mod_t < QP - p / 2), # First rise
-    #     np.logical_and(x_mod_t >= QP - p / 2, x_mod_t < QP + p / 2), # Steady peak
-    #     np.logical_and(x_mod_t >= QP + p / 2, x_mod_t < 3 * QP - p / 2), # Fall
-    #     np.logical_and(x_mod_t >= 3 * QP - p / 2, x_mod_t < 3 * QP + p / 2), # Steady trough
-    #     np.logical_and(x_mod_t >= 3 * QP + p / 2, x_mod_t < 4 * QP) # Second rise
-    # ],
-    # [
-    #     lambda x_mod_t: x_mod_t * rise, # First rise
-    #     amp, # Steady peak
-    #     lambda x_mod_t: (x_mod_t - (QP + p / 2)) * -rise, # Fall
-    #     -amp, # Steady trough
-    #     lambda x_mod_t: (x_mod_t - (3 * QP + p / 2)) * rise # Second rise
-    # ])
-
     # Alternative implementation with select
 
     # Condition lists

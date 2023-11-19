@@ -5,6 +5,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from analyzer import waveforms
 from os.path import dirname
+from math import ceil, pi
 
 # Output directory
 OUT_DIR = dirname(__file__) + "/../outputs"
@@ -15,10 +16,10 @@ plt.style.use('dark_background')
 plt.xlabel("x")
 plt.ylabel("y")
 # Set graph title
-plt.title("A Square Wave")
+plt.title("A Sawtooth Wave")
 
 # Frequency
-waveforms.freq = 200
+waveforms.freq = 1 / (2 * pi)
 
 # Amplitude
 waveforms.amp = 1
@@ -32,11 +33,14 @@ plt.axis([0, 1 / waveforms.freq, -waveforms.amp - Y_MARGIN, waveforms.amp + Y_MA
 # Sample rate
 SAMP_RATE = 8000
 
+# Periods of wave to analyze
+SAMP_PERIODS = 1
+
 # Terminating value of X list
-SAMP_END = 100
+SAMP_END = 1 / waveforms.freq * SAMP_PERIODS
 
 # Number of samples
-num_samp = SAMP_RATE * SAMP_END
+num_samp = ceil(SAMP_RATE * SAMP_END)
 
 # X list
 xlist = np.linspace(0, SAMP_END, num_samp)
@@ -48,14 +52,14 @@ xlist = np.linspace(0, SAMP_END, num_samp)
 # y_pul = waveforms.rect_osc(xlist, 0.1)
 # y_sin = waveforms.sin_osc(xlist)
 # y_tri = waveforms.tri_osc(xlist)
-# y_saw = waveforms.saw_osc(xlist)
+y_saw = waveforms.saw_osc(xlist)
 
 # plt.plot(xlist, y_squ)
 # plt.plot(xlist, y_pul)
 # plt.plot(xlist, y_sin)
 # plt.plot(xlist, y_tri)
-# plt.plot(xlist, y_saw)
-# plt.savefig(f"{OUT_DIR}/squ.png")
+plt.plot(xlist, y_saw)
+plt.savefig(f"{OUT_DIR}/sin.png")
 
 # 2. Parameterized oscillators
 
